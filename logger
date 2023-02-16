@@ -1,0 +1,97 @@
+Controller----
+
+package com.example.demo.controller;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class LoggingController {
+	
+	private static final Logger LOG = LogManager.getLogger(LoggingController.class);
+
+    @GetMapping(value = "/api/greeting/{name}")
+    public ResponseEntity<?> getGreetingMessage(@PathVariable(value = "name") String name) {
+        LOG.info("Get Greeting Message Input: " + name);
+        String greetingMessage = "Hello and Welcome " + name;
+        LOG.debug("Greeting Message Output: " + greetingMessage.toUpperCase());
+        LOG.warn("Warning");
+        LOG.error("Error");
+        LOG.fatal("Fatal");
+        return ResponseEntity.ok().body(greetingMessage);
+    }
+
+}
+
+
+Application Properties--
+logging.file.path=C:/temp
+
+
+log4j2.xml---
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+         <Property name="APP_LOG_ROOT" value="C:/temp" /> 
+    </Properties>
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+        </Console>
+        <File name="FileAppender" fileName="app.log">
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+        </File>
+        <RollingFile name="RollingFileAppender"
+                     fileName="${APP_LOG_ROOT}/logging-demo-app.log"
+                     filePattern="${APP_LOG_ROOT}/logging-demo-app-%d{dd-MM-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- rollover on startup, daily and when the file reaches
+                    5 KiloBytes -->
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy
+                        size="5 KB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.example.demo" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="RollingFileAppender" />
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="RollingFileAppender" />
+        </Root>
+    </Loggers>
+</Configuration>
+
+
+Dependency---
+<dependency>
+		    <groupId>log4j</groupId>
+		    <artifactId>log4j</artifactId>
+		    <version>1.2.17</version>
+		</dependency>
+		<dependency>
+		    <groupId>log4j</groupId>
+		    <artifactId>apache-log4j-extras</artifactId>
+		    <version>1.2.17</version>
+		</dependency>
